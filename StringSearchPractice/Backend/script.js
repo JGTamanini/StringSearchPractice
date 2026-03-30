@@ -41,6 +41,7 @@ let isAutoRunning = false; // Flag de controle do modo automático
 let comparisons = 0;       // Total de comparações da última execução
 let foundPositions = [];   // Posições onde o padrão foi encontrado
 let allResults = {};       // Resultados de todos os algoritmos (para comparação)
+let isLoadingFile = false;
 
 
 // ===================== UTILITÁRIOS DE UI =====================
@@ -233,9 +234,11 @@ document.getElementById('file-input').addEventListener('change', function () {
       // Só atualiza o estado quando TODOS os arquivos forem lidos
       if (loaded === files.length) {
         appText = combined;
+        isLoadingFile = true;
         // Mostra preview limitado a 500 chars no textarea
         document.getElementById('manual-text').value =
           combined.substring(0, 500) + (combined.length > 500 ? '...' : '');
+        isLoadingFile = false;
         renderText(appText);
         setStatus(`${files.length} arquivo(s) carregado(s). ${appText.length} caracteres.`, 'idle');
         document.getElementById('m-textlen').textContent = appText.length;
@@ -250,6 +253,7 @@ document.getElementById('file-input').addEventListener('change', function () {
  * Atualiza appText e re-renderiza o texto a cada keystroke.
  */
 document.getElementById('manual-text').addEventListener('input', function () {
+  if (isLoadingFile) return;
   appText = this.value;
   if (appText) {
     renderText(appText);
@@ -274,7 +278,7 @@ document.getElementById('speed-slider').addEventListener('input', function () {
  */
 function getText() {
   const manual = document.getElementById('manual-text').value;
-  if (manual) appText = manual;
+  if (manual && !manual.endsWith('...')) appText = manual;
   return appText;
 }
 
