@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StringScope — Visualizador de Algoritmos de Busca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script type="module" src="../Backend/script.js"></script>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">⌕</div>
+      <div>
+        <div class="logo-text">StringScope</div>
+        <div class="logo-sub">Visualizador de Algoritmos de Busca em Strings</div>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="badge">NAIVE</span>
+      <span class="badge">RABIN-KARP</span>
+      <span class="badge">KMP</span>
+      <span class="badge">BOYER-MOORE</span>
+    </div>
+  </header>
+
+  <div class="main-grid">
+    <!-- LEFT: CONTROL PANEL -->
+    <div>
+      <div class="panel mb-12" style="margin-bottom:20px">
+        <div class="panel-header">
+          <div class="panel-dot"></div>
+          <span class="panel-title">Configuração</span>
+        </div>
+        <div class="panel-body">
+
+          <div class="form-group">
+            <label>Arquivos .txt</label>
+            <div class="upload-area">
+              <input type="file" id="file-input" accept=".txt" multiple>
+              <div class="upload-icon">📂</div>
+              <div class="upload-text">Clique ou arraste arquivos .txt</div>
+              <div class="upload-sub">múltiplos arquivos permitidos</div>
+            </div>
+            <div id="file-list"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Ou insira o texto manualmente</label>
+            <textarea id="manual-text" class="input-field" rows="3" placeholder="Digite ou cole o texto aqui..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Padrão de Busca (Pattern)</label>
+            <input type="text" id="pattern-input" class="input-field" placeholder="ex: algoritmo">
+          </div>
+
+          <div class="form-group">
+            <label>Algoritmo</label>
+            <select id="algo-select" class="select-field">
+              <option value="naive">Busca Naive (Força Bruta)</option>
+              <option value="rabin">Rabin-Karp</option>
+              <option value="kmp">Knuth-Morris-Pratt (KMP)</option>
+              <option value="bm">Boyer-Moore</option>
+              <option value="all">Todos (Comparação)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Velocidade do Passo a Passo</label>
+            <div class="speed-row">
+              <input type="range" id="speed-slider" class="speed-slider" min="50" max="1500" value="600">
+              <span class="speed-label" id="speed-label">600ms</span>
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-primary" id="btn-run" onclick="runSearch()">
+              ▶ Executar
+            </button>
+            <button class="btn btn-secondary" id="btn-step-init" onclick="initStepByStep()">
+              ⏭ Passo a Passo
+            </button>
+            <button class="btn btn-outline" id="btn-prev" onclick="prevStep()" disabled>
+              ◀ Anterior
+            </button>
+            <button class="btn btn-outline" id="btn-next" onclick="nextStep()" disabled>
+              Próximo ▶
+            </button>
+            <button class="btn btn-outline" id="btn-auto" onclick="toggleAuto()" disabled>
+              ⚡ Auto
+            </button>
+            <button class="btn btn-outline" id="btn-pause" onclick="pauseAuto()" disabled>
+              ⏸ Pausar
+            </button>
+            <button class="btn btn-full" onclick="resetAll()">
+              ↺ Reiniciar
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- COMPLEXITY PANEL -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan)"></div>
+          <span class="panel-title">Complexidade Teórica</span>
+        </div>
+        <div class="panel-body">
+          <table class="complexity-table">
+            <thead>
+              <tr>
+                <th>Algoritmo</th>
+                <th>Melhor</th>
+                <th>Médio</th>
+                <th>Pior</th>
+              </tr>
+            </thead>
+            <tbody id="complexity-tbody">
+              <tr data-algo="naive">
+                <td>Naive</td>
+                <td><span class="tag tag-worst">O(nm)</span></td>
+                <td><span class="tag tag-worst">O(nm)</span></td>
+                <td><span class="tag tag-worst">O(nm)</span></td>
+              </tr>
+              <tr data-algo="rabin">
+                <td>Rabin-Karp</td>
+                <td><span class="tag tag-best">O(n+m)</span></td>
+                <td><span class="tag tag-best">O(n+m)</span></td>
+                <td><span class="tag tag-worst">O(nm)</span></td>
+              </tr>
+              <tr data-algo="kmp">
+                <td>KMP</td>
+                <td><span class="tag tag-best">O(n+m)</span></td>
+                <td><span class="tag tag-best">O(n+m)</span></td>
+                <td><span class="tag tag-best">O(n+m)</span></td>
+              </tr>
+              <tr data-algo="bm">
+                <td>Boyer-Moore</td>
+                <td><span class="tag tag-best">O(n/m)</span></td>
+                <td><span class="tag tag-mid">O(n)</span></td>
+                <td><span class="tag tag-worst">O(nm)</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: VISUALIZATION PANEL -->
+    <div class="right-panel">
+
+      <!-- STATUS -->
+      <div id="status-bar">
+        <div class="status-dot idle" id="status-dot"></div>
+        <span id="status-msg">Aguardando entrada de dados...</span>
+      </div>
+
+      <!-- METRICS -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold)"></div>
+          <span class="panel-title">Métricas em Tempo Real</span>
+        </div>
+        <div class="panel-body">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-value" id="m-comparisons">—</div>
+              <div class="metric-label">Comparações</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="m-time">—</div>
+              <div class="metric-label">Tempo (ms)</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="m-found">—</div>
+              <div class="metric-label">Ocorrências</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="m-step">—</div>
+              <div class="metric-label">Passo Atual</div>
+            </div>
+          </div>
+          <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; font-family:'Space Mono',monospace; font-size:11px; color:var(--text3)">
+            <span>|text|: <span id="m-textlen" style="color:var(--text2)">—</span></span>
+            <span>|pattern|: <span id="m-patlen" style="color:var(--text2)">—</span></span>
+            <span>Algoritmo: <span id="m-algo" style="color:var(--accent3)">—</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISUALIZATION -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-dot" style="background:var(--green);box-shadow:0 0 8px var(--green)"></div>
+          <span class="panel-title">Visualização</span>
+        </div>
+        <div class="panel-body">
+          <div class="tabs">
+            <button class="tab active" onclick="switchTab('text-tab')">Texto</button>
+            <button class="tab" onclick="switchTab('pattern-tab')">Padrão</button>
+            <button class="tab" onclick="switchTab('aux-tab')">Estrutura Auxiliar</button>
+            <button class="tab" onclick="switchTab('log-tab')">Log</button>
+            <button class="tab" onclick="switchTab('compare-tab')">Comparar</button>
+          </div>
+
+          <!-- TEXT TAB -->
+          <div id="text-tab" class="tab-content active">
+            <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:8px;letter-spacing:1px">
+              TEXTO — posição atual marcada
+            </div>
+            <div id="text-display"></div>
+            <div style="margin-top:12px">
+              <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:1px">POSIÇÕES ENCONTRADAS</div>
+              <div class="result-positions" id="result-positions">
+                <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text3)">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PATTERN TAB -->
+          <div id="pattern-tab" class="tab-content">
+            <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:8px;letter-spacing:1px">
+              PADRÃO — alinhamento atual
+            </div>
+            <div id="pattern-display"></div>
+            <div style="margin-top:12px;font-family:'Space Mono',monospace;font-size:11px;color:var(--text3)" id="pattern-info">
+              Aguardando execução...
+            </div>
+          </div>
+
+          <!-- AUX TAB -->
+          <div id="aux-tab" class="tab-content">
+            <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:8px;letter-spacing:1px" id="aux-title">
+              ESTRUTURA AUXILIAR
+            </div>
+            <div id="aux-table-container">
+              <div style="color:var(--text3);font-family:'Space Mono',monospace;font-size:12px;padding:20px;text-align:center">
+                Execute um algoritmo para ver a estrutura auxiliar
+              </div>
+            </div>
+          </div>
+
+          <!-- LOG TAB -->
+          <div id="log-tab" class="tab-content">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px">LOG DE EXECUÇÃO</div>
+              <button onclick="clearLog()" style="font-family:'Space Mono',monospace;font-size:10px;background:none;border:1px solid var(--border);color:var(--text3);padding:3px 8px;border-radius:4px;cursor:pointer">limpar</button>
+            </div>
+            <div id="log-container"></div>
+          </div>
+
+          <!-- COMPARE TAB -->
+          <div id="compare-tab" class="tab-content">
+            <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:12px;letter-spacing:1px">
+              COMPARAÇÃO ENTRE ALGORITMOS
+            </div>
+            <div id="compare-content">
+              <div style="color:var(--text3);font-family:'Space Mono',monospace;font-size:12px;padding:20px;text-align:center">
+                Execute com "Todos" ou individualmente para comparar
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>
