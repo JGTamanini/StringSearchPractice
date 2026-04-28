@@ -28,9 +28,9 @@
   </header>
 
   <div class="main-grid">
-    <!-- LEFT: CONTROL PANEL -->
+    <!-- PAINEL ESQUERDO: CONFIGURAÇÃO -->
     <div>
-      <div class="panel mb-12" style="margin-bottom:20px">
+      <div class="panel" style="margin-bottom:20px">
         <div class="panel-header">
           <div class="panel-dot"></div>
           <span class="panel-title">Configuração</span>
@@ -78,36 +78,22 @@
           </div>
 
           <div class="btn-group">
-            <button class="btn btn-primary" id="btn-run" onclick="runSearch()">
-              ▶ Executar
-            </button>
-            <button class="btn btn-secondary" id="btn-step-init" onclick="initStepByStep()">
-              ⏭ Passo a Passo
-            </button>
-            <button class="btn btn-outline" id="btn-prev" onclick="prevStep()" disabled>
-              ◀ Anterior
-            </button>
-            <button class="btn btn-outline" id="btn-next" onclick="nextStep()" disabled>
-              Próximo ▶
-            </button>
-            <button class="btn btn-outline" id="btn-auto" onclick="toggleAuto()" disabled>
-              ⚡ Auto
-            </button>
-            <button class="btn btn-outline" id="btn-pause" onclick="pauseAuto()" disabled>
-              ⏸ Pausar
-            </button>
-            <button class="btn btn-full" onclick="resetAll()">
-              ↺ Reiniciar
-            </button>
+            <button class="btn btn-primary"   id="btn-run"       onclick="runSearch()">▶ Executar</button>
+            <button class="btn btn-secondary" id="btn-step-init" onclick="initStepByStep()">⏭ Passo a Passo</button>
+            <button class="btn btn-outline"   id="btn-prev"      onclick="prevStep()" disabled>◀ Anterior</button>
+            <button class="btn btn-outline"   id="btn-next"      onclick="nextStep()" disabled>Próximo ▶</button>
+            <button class="btn btn-outline"   id="btn-auto"      onclick="toggleAuto()" disabled>⚡ Auto</button>
+            <button class="btn btn-outline"   id="btn-pause"     onclick="pauseAuto()" disabled>⏸ Pausar</button>
+            <button class="btn btn-full"                         onclick="resetAll()">↺ Reiniciar</button>
           </div>
 
         </div>
       </div>
 
-      <!-- COMPLEXITY PANEL -->
+      <!-- PAINEL DE COMPLEXIDADE -->
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan)"></div>
+          <div class="panel-dot panel-dot--cyan"></div>
           <span class="panel-title">Complexidade Teórica</span>
         </div>
         <div class="panel-body">
@@ -151,19 +137,18 @@
       </div>
     </div>
 
-    <!-- RIGHT: VISUALIZATION PANEL -->
+    <!-- PAINEL DIREITO: VISUALIZAÇÃO -->
     <div class="right-panel">
 
-      <!-- STATUS -->
       <div id="status-bar">
         <div class="status-dot idle" id="status-dot"></div>
         <span id="status-msg">Aguardando entrada de dados...</span>
       </div>
 
-      <!-- METRICS -->
+      <!-- MÉTRICAS -->
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold)"></div>
+          <div class="panel-dot panel-dot--gold"></div>
           <span class="panel-title">Métricas em Tempo Real</span>
         </div>
         <div class="panel-body">
@@ -185,18 +170,18 @@
               <div class="metric-label">Passo Atual</div>
             </div>
           </div>
-          <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; font-family:'Space Mono',monospace; font-size:11px; color:var(--text3)">
-            <span>|text|: <span id="m-textlen" style="color:var(--text2)">—</span></span>
-            <span>|pattern|: <span id="m-patlen" style="color:var(--text2)">—</span></span>
-            <span>Algoritmo: <span id="m-algo" style="color:var(--accent3)">—</span></span>
+          <div class="metrics-meta">
+            <span>|text|: <span id="m-textlen" class="metrics-meta-value">—</span></span>
+            <span>|pattern|: <span id="m-patlen" class="metrics-meta-value">—</span></span>
+            <span>Algoritmo: <span id="m-algo" class="metrics-meta-algo">—</span></span>
           </div>
         </div>
       </div>
 
-      <!-- VISUALIZATION -->
+      <!-- VISUALIZAÇÃO -->
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-dot" style="background:var(--green);box-shadow:0 0 8px var(--green)"></div>
+          <div class="panel-dot panel-dot--green"></div>
           <span class="panel-title">Visualização</span>
         </div>
         <div class="panel-body">
@@ -208,61 +193,47 @@
             <button class="tab" onclick="switchTab('compare-tab')">Comparar</button>
           </div>
 
-          <!-- TEXT TAB -->
+          <!-- TEXTO -->
           <div id="text-tab" class="tab-content active">
-            <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:8px;letter-spacing:1px">
-              TEXTO — posição atual marcada
-            </div>
+            <div class="tab-label">TEXTO — posição atual marcada</div>
             <div id="text-display"></div>
-            <div style="margin-top:12px">
-              <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:1px">POSIÇÕES ENCONTRADAS</div>
+            <div class="result-section">
+              <div class="tab-label">POSIÇÕES ENCONTRADAS</div>
               <div class="result-positions" id="result-positions">
-                <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text3)">—</span>
+                <span class="result-empty">—</span>
               </div>
             </div>
           </div>
 
-          <!-- PATTERN TAB -->
+          <!-- PADRÃO -->
           <div id="pattern-tab" class="tab-content">
-            <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:8px;letter-spacing:1px">
-              PADRÃO — alinhamento atual
-            </div>
+            <div class="tab-label">PADRÃO — alinhamento atual</div>
             <div id="pattern-display"></div>
-            <div style="margin-top:12px;font-family:'Space Mono',monospace;font-size:11px;color:var(--text3)" id="pattern-info">
-              Aguardando execução...
-            </div>
+            <div class="pattern-info" id="pattern-info">Aguardando execução...</div>
           </div>
 
-          <!-- AUX TAB -->
+          <!-- ESTRUTURA AUXILIAR -->
           <div id="aux-tab" class="tab-content">
-            <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:8px;letter-spacing:1px" id="aux-title">
-              ESTRUTURA AUXILIAR
-            </div>
+            <div class="tab-label" id="aux-title">ESTRUTURA AUXILIAR</div>
             <div id="aux-table-container">
-              <div style="color:var(--text3);font-family:'Space Mono',monospace;font-size:12px;padding:20px;text-align:center">
-                Execute um algoritmo para ver a estrutura auxiliar
-              </div>
+              <div class="aux-placeholder">Execute um algoritmo para ver a estrutura auxiliar</div>
             </div>
           </div>
 
-          <!-- LOG TAB -->
+          <!-- LOG -->
           <div id="log-tab" class="tab-content">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-              <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px">LOG DE EXECUÇÃO</div>
-              <button onclick="clearLog()" style="font-family:'Space Mono',monospace;font-size:10px;background:none;border:1px solid var(--border);color:var(--text3);padding:3px 8px;border-radius:4px;cursor:pointer">limpar</button>
+            <div class="log-header">
+              <div class="tab-label">LOG DE EXECUÇÃO</div>
+              <button class="btn-clear-log" onclick="clearLog()">limpar</button>
             </div>
             <div id="log-container"></div>
           </div>
 
-          <!-- COMPARE TAB -->
+          <!-- COMPARAR -->
           <div id="compare-tab" class="tab-content">
-            <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:12px;letter-spacing:1px">
-              COMPARAÇÃO ENTRE ALGORITMOS
-            </div>
+            <div class="tab-label">COMPARAÇÃO ENTRE ALGORITMOS</div>
             <div id="compare-content">
-              <div style="color:var(--text3);font-family:'Space Mono',monospace;font-size:12px;padding:20px;text-align:center">
-                Execute com "Todos" ou individualmente para comparar
-              </div>
+              <div class="aux-placeholder">Execute com "Todos" ou individualmente para comparar</div>
             </div>
           </div>
 
