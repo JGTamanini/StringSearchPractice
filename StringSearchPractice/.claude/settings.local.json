@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\eg3ca\\\\OneDrive\\\\Documentos\\\\GitHub\\\\StringSearchPractice\\\\StringSearchPractice\" -Recurse -Force)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Sort-Object FullName)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(find \"C:\\\\\\\\Users\\\\\\\\eg3ca\\\\\\\\OneDrive\\\\\\\\Documentos\\\\\\\\GitHub\\\\\\\\StringSearchPractice\\\\\\\\StringSearchPractice\" -type f)",
+      "Bash(cd \"C:\\\\\\\\Users\\\\\\\\eg3ca\\\\\\\\OneDrive\\\\\\\\Documentos\\\\\\\\GitHub\\\\\\\\StringSearchPractice\\\\\\\\StringSearchPractice\")",
+      "Bash(wc -l \"C:\\\\\\\\Users\\\\\\\\eg3ca\\\\\\\\OneDrive\\\\\\\\Documentos\\\\\\\\GitHub\\\\\\\\StringSearchPractice\\\\\\\\StringSearchPractice\\\\\\\\Frontend\\\\\\\\styles.css\")",
+      "Bash(npm install *)",
+      "Bash(node --import ./tracing.js server.js)",
+      "Bash(curl -s http://localhost:3000/health)",
+      "Bash(curl -s -X POST http://localhost:3000/api/search -H \"Content-Type: application/json\" -d \"{\\\\\"text\\\\\":\\\\\"abcabcabc\\\\\",\\\\\"pattern\\\\\":\\\\\"abc\\\\\",\\\\\"algorithm\\\\\":\\\\\"kmp\\\\\"}\")",
+      "Bash(python -m json.tool --no-ensure-ascii)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('comparisons:', d['comparisons'], '| positions:', d['positions'], '| duration_ms:', round\\(d['duration'],3\\), '| traceId:', d['traceId'][:16]+'...'\\)\")",
+      "Bash(curl -s -X POST http://localhost:3000/api/search/all -H \"Content-Type: application/json\" -d \"{\\\\\"text\\\\\":\\\\\"abcabcabc\\\\\",\\\\\"pattern\\\\\":\\\\\"abc\\\\\"}\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k, '->', v['comparisons'], 'comp,', round\\(v['time'],3\\), 'ms'\\) for k,v in d['results'].items\\(\\)]\")",
+      "Bash(curl -s http://localhost:9464/metrics)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/Backend/script.js)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/styles.css)",
+      "Bash(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
+      "Bash(Stop-Process -Force)",
+      "Bash(pkill -f \"node.*server.js\")"
+    ]
+  }
+}

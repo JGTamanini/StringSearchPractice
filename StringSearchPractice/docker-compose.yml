@@ -1,0 +1,90 @@
+version: '3.8'
+
+# =============================================================================
+# StringScope — Stack de Observabilidade
+# =============================================================================
+# Serviços:
+#   app        → Aplicação Node.js (http://localhost:3000)
+#   jaeger     → Visualizador de Traces (http://localhost:16686)
+#   prometheus → Coleta de Métricas (http://localhost:9090)
+#   grafana    → Dashboard (http://localhost:3001  login: admin / stringscope)
+# =============================================================================
+
+services:
+
+  app:
+    build: .
+    container_name: stringscope-app
+    ports:
+      - "3000:3000"   # Aplicação
+      - "9464:9464"   # Endpoint Prometheus /metrics
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - PROMETHEUS_PORT=9464
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4318/v1/traces
+    depends_on:
+      - jaeger
+    restart: unless-stopped
+    networks:
+      - stringscope-net
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: stringscope-jaeger
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4318:4318"    # OTLP HTTP (recebe traces da aplicação)
+      - "4317:4317"    # OTLP gRPC (opcional)
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    restart: unless-stopped
+    networks:
+      - stringscope-net
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: stringscope-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    depends_on:
+      - app
+    restart: unless-stopped
+    networks:
+      - stringscope-net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: stringscope-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=stringscope
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - stringscope-net
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  stringscope-net:
+    driver: bridge

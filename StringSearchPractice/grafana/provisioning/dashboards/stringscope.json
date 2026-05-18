@@ -1,0 +1,350 @@
+{
+  "title": "StringScope — Análise de Algoritmos de Busca",
+  "uid": "stringscope-dashboard",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-30m", "to": "now" },
+  "timezone": "browser",
+  "tags": ["stringscope", "algorithms", "observability"],
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [],
+  "annotations": { "list": [] },
+  "templating": { "list": [] },
+  "timepicker": {},
+  "panels": [
+
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Total de Buscas",
+      "description": "Número total de buscas executadas desde o início",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(search_requests_total) or vector(0)",
+          "legendFormat": "Total",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "area"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#7c3aed", "value": null }
+            ]
+          },
+          "unit": "short",
+          "mappings": []
+        }
+      }
+    },
+
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Duração Média (ms)",
+      "description": "Tempo médio de execução de todos os algoritmos",
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(search_duration_ms_sum) / sum(search_duration_ms_count)",
+          "legendFormat": "Média",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#06b6d4", "value": null },
+              { "color": "#f59e0b", "value": 10 },
+              { "color": "#ef4444", "value": 100 }
+            ]
+          },
+          "unit": "ms",
+          "decimals": 2
+        }
+      }
+    },
+
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Comparações Médias",
+      "description": "Número médio de comparações por busca",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(search_comparisons_sum) / sum(search_comparisons_count)",
+          "legendFormat": "Média",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#10b981", "value": null },
+              { "color": "#f59e0b", "value": 1000 },
+              { "color": "#ef4444", "value": 10000 }
+            ]
+          },
+          "unit": "short",
+          "decimals": 0
+        }
+      }
+    },
+
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Ocorrências Encontradas",
+      "description": "Total de ocorrências do padrão encontradas",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(search_occurrences_total) or vector(0)",
+          "legendFormat": "Total",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "area"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#10b981", "value": null }
+            ]
+          },
+          "unit": "short"
+        }
+      }
+    },
+
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Taxa de Requisições por Algoritmo (req/min)",
+      "description": "Número de buscas por minuto, separado por algoritmo",
+      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by(algorithm) (rate(search_requests_total[1m])) * 60",
+          "legendFormat": "{{algorithm}}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum", "max"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "spanNulls": true
+          },
+          "unit": "reqpm",
+          "min": 0
+        }
+      }
+    },
+
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Duração de Execução — P50 e P95 (ms)",
+      "description": "Percentis de duração de execução por algoritmo. P95 indica o pior caso praticamente observado.",
+      "gridPos": { "x": 0, "y": 12, "w": 14, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum by(le, algorithm) (rate(search_duration_ms_bucket[5m])))",
+          "legendFormat": "P50 — {{algorithm}}",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by(le, algorithm) (rate(search_duration_ms_bucket[5m])))",
+          "legendFormat": "P95 — {{algorithm}}",
+          "refId": "B"
+        }
+      ],
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "asc" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "spanNulls": true
+          },
+          "unit": "ms",
+          "decimals": 2,
+          "min": 0
+        }
+      }
+    },
+
+    {
+      "id": 7,
+      "type": "bargauge",
+      "title": "Comparações Médias por Algoritmo",
+      "description": "Média do número de comparações de caracteres por algoritmo. Quanto menor, mais eficiente.",
+      "gridPos": { "x": 14, "y": 12, "w": 10, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by(algorithm) (search_comparisons_sum) / sum by(algorithm) (search_comparisons_count)",
+          "legendFormat": "{{algorithm}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "showUnfilled": true,
+        "valueMode": "color",
+        "text": {}
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd",
+            "fixedColor": "green"
+          },
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "custom": { "fillOpacity": 80 }
+        }
+      }
+    },
+
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Distribuição de Comparações — Algoritmos ao Longo do Tempo",
+      "description": "Evolução do número médio de comparações por algoritmo conforme buscas são realizadas.",
+      "gridPos": { "x": 0, "y": 20, "w": 14, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by(algorithm) (rate(search_comparisons_sum[2m])) / sum by(algorithm) (rate(search_comparisons_count[2m]))",
+          "legendFormat": "{{algorithm}}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "spanNulls": true
+          },
+          "unit": "short",
+          "min": 0
+        }
+      }
+    },
+
+    {
+      "id": 9,
+      "type": "bargauge",
+      "title": "Ocorrências Encontradas por Algoritmo",
+      "description": "Total acumulado de ocorrências do padrão encontradas por algoritmo.",
+      "gridPos": { "x": 14, "y": 20, "w": 10, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by(algorithm) (search_occurrences_total)",
+          "legendFormat": "{{algorithm}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "showUnfilled": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "continuous-BlPu" },
+          "unit": "short",
+          "min": 0
+        }
+      }
+    },
+
+    {
+      "id": 10,
+      "type": "text",
+      "title": "Links Úteis",
+      "gridPos": { "x": 0, "y": 28, "w": 24, "h": 3 },
+      "options": {
+        "mode": "markdown",
+        "content": "## Links de Observabilidade\n\n| Serviço | URL | Descrição |\n|---|---|---|\n| **StringScope** | [http://localhost:3000](http://localhost:3000) | Aplicação principal |\n| **Jaeger UI** | [http://localhost:16686](http://localhost:16686) | Visualização de traces distribuídos |\n| **Prometheus** | [http://localhost:9090](http://localhost:9090) | Métricas brutas e queries PromQL |\n| **Métricas Raw** | [http://localhost:9464/metrics](http://localhost:9464/metrics) | Endpoint de métricas da aplicação |"
+      },
+      "fieldConfig": { "defaults": {}, "overrides": [] }
+    }
+
+  ]
+}

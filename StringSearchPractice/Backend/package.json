@@ -1,0 +1,22 @@
+{
+  "name": "stringscope",
+  "version": "2.0.0",
+  "description": "StringScope — Visualizador de Algoritmos de Busca com OpenTelemetry",
+  "type": "module",
+  "scripts": {
+    "start": "node --import ./tracing.js server.js",
+    "dev": "node --watch --import ./tracing.js server.js"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.50.0",
+    "@opentelemetry/exporter-prometheus": "^0.54.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.54.0",
+    "@opentelemetry/resources": "^1.27.0",
+    "@opentelemetry/sdk-metrics": "^1.27.0",
+    "@opentelemetry/sdk-node": "^0.54.0",
+    "@opentelemetry/semantic-conventions": "^1.27.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.0"
+  }
+}

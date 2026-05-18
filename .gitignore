@@ -1,0 +1,18 @@
+node_modules/
+Backend/node_modules/
+
+# Grafana e Prometheus dados persistentes (gerados pelo Docker)
+grafana/data/
+prometheus/data/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Variáveis de ambiente
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db

@@ -209,10 +209,13 @@ function getPattern() {
 }
 
 
-// ── Execução dos algoritmos ───────────────────────────────────────────────────
+// ── Execução dos algoritmos — via API com observabilidade ────────────────────
+// runSearch e runAllAlgorithms delegam para o servidor Node.js, que instrumenta
+// cada execução com OpenTelemetry (traces + métricas + logs).
+// initStepByStep mantém execução local para suportar a visualização interativa.
 
 /** Ponto de entrada: executa a busca completa (sem passo a passo). */
-function runSearch() {
+async function runSearch() {
   const text = getText();
   const pattern = getPattern();
 
@@ -238,78 +241,96 @@ function runSearch() {
   updateComplexityHighlight(algoKey);
 
   if (algoKey === 'all') {
-    runAllAlgorithms(text, pattern);
+    await runAllAlgorithms(text, pattern);
     return;
   }
 
-  const strategy = getStrategy(algoKey);
-  const t0 = performance.now();
-  const algoSteps = strategy.execute(text, pattern);
-  const t1 = performance.now();
+  setStatus('⏳ Executando análise instrumentada no servidor...', 'running');
 
-  const lastStep = algoSteps[algoSteps.length - 1];
-  const totalComparisons = lastStep ? lastStep.comparisons : 0;
-  const positions = algoSteps.filter(s => s.type === 'found').map(s => s.foundPos);
+  try {
+    const response = await fetch('/api/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, pattern, algorithm: algoKey }),
+    });
 
-  comparisons = totalComparisons;
-  foundPositions = positions;
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+      throw new Error(err.error || `HTTP ${response.status}`);
+    }
 
-  document.getElementById('m-comparisons').textContent = totalComparisons;
-  document.getElementById('m-time').textContent = (t1 - t0).toFixed(3);
-  document.getElementById('m-found').textContent = positions.length;
-  document.getElementById('m-step').textContent = algoSteps.length;
+    const data = await response.json();
+    const { steps: algoSteps, comparisons: totalComparisons, positions, duration, traceId } = data;
 
-  showResultPositions(positions);
+    comparisons = totalComparisons;
+    foundPositions = positions;
 
-  const hmap = {};
-  positions.forEach(p => {
-    for (let k = p; k < p + pattern.length; k++) hmap[k] = 'full-match';
-  });
-  highlightTextChars(hmap);
+    document.getElementById('m-comparisons').textContent = totalComparisons;
+    document.getElementById('m-time').textContent = duration.toFixed(3);
+    document.getElementById('m-found').textContent = positions.length;
+    document.getElementById('m-step').textContent = algoSteps.length;
 
-  algoSteps.forEach((s, idx) => {
-    log(idx + 1, stepLogType(s.type), s.msg);
-  });
+    showResultPositions(positions);
 
-  renderAuxTable(algoKey, pattern);
+    const hmap = {};
+    positions.forEach(p => {
+      for (let k = p; k < p + pattern.length; k++) hmap[k] = 'full-match';
+    });
+    highlightTextChars(hmap);
 
-  setStatus(
-    `✓ Busca concluída: ${positions.length} ocorrência(s) | ${totalComparisons} comparações | ${(t1 - t0).toFixed(3)}ms`,
-    'done'
-  );
+    algoSteps.forEach((s, idx) => {
+      log(idx + 1, stepLogType(s.type), s.msg);
+    });
 
-  allResults[algoKey] = { comparisons: totalComparisons, time: t1 - t0, found: positions.length };
-  updateCompareTable();
-  activateTabByIndex(0);
+    renderAuxTable(algoKey, pattern);
+
+    const traceInfo = traceId ? ` | trace: ${traceId.slice(0, 8)}…` : '';
+    setStatus(
+      `✓ Busca concluída: ${positions.length} ocorrência(s) | ${totalComparisons} comparações | ${duration.toFixed(3)}ms${traceInfo}`,
+      'done'
+    );
+
+    allResults[algoKey] = { comparisons: totalComparisons, time: duration, found: positions.length };
+    updateCompareTable();
+    activateTabByIndex(0);
+
+  } catch (err) {
+    setStatus(`✗ Erro: ${err.message}. Verifique se o servidor está rodando (npm start).`, 'error');
+  }
 }
 
-/** Executa todos os algoritmos e navega para a aba de comparação. */
-function runAllAlgorithms(text, pattern) {
-  ALL_STRATEGY_KEYS.forEach(key => {
-    const strategy = getStrategy(key);
-    const t0 = performance.now();
-    const algoSteps = strategy.execute(text, pattern);
-    const t1 = performance.now();
+/** Executa todos os algoritmos via API e navega para a aba de comparação. */
+async function runAllAlgorithms(text, pattern) {
+  setStatus('⏳ Executando todos os algoritmos no servidor...', 'running');
 
-    const lastStep = algoSteps[algoSteps.length - 1];
-    const totalComp = lastStep ? lastStep.comparisons : 0;
-    const positions = algoSteps.filter(s => s.type === 'found').map(s => s.foundPos);
+  try {
+    const response = await fetch('/api/search/all', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, pattern }),
+    });
 
-    allResults[key] = {
-      comparisons: totalComp,
-      time: t1 - t0,
-      found: positions.length,
-      name: strategy.name,
-    };
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+      throw new Error(err.error || `HTTP ${response.status}`);
+    }
 
-    log(1, 'compare',
-      `[${strategy.name}] ${totalComp} comparações, ${(t1 - t0).toFixed(3)}ms, ${positions.length} ocorrências`
-    );
-  });
+    const data = await response.json();
+    allResults = data.results;
 
-  updateCompareTable();
-  setStatus('✓ Todos os algoritmos executados. Compare na aba "Comparar".', 'done');
-  activateTabByIndex(4);
+    Object.entries(allResults).forEach(([, r]) => {
+      log(1, 'compare',
+        `[${r.name}] ${r.comparisons} comparações, ${r.time.toFixed(3)}ms, ${r.found} ocorrências`
+      );
+    });
+
+    updateCompareTable();
+    setStatus('✓ Todos os algoritmos executados. Compare na aba "Comparar".', 'done');
+    activateTabByIndex(4);
+
+  } catch (err) {
+    setStatus(`✗ Erro: ${err.message}. Verifique se o servidor está rodando (npm start).`, 'error');
+  }
 }
 
 /** Atualiza a tabela comparativa destacando os melhores valores. */

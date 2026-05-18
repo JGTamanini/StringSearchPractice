@@ -6,8 +6,8 @@
 <title>StringScope — Visualizador de Algoritmos de Busca</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
-<script type="module" src="../Backend/script.js"></script>
+<link rel="stylesheet" href="/styles.css">
+<script type="module" src="/Backend/script.js"></script>
 </head>
 <body>
 <div class="app">
@@ -24,6 +24,15 @@
       <span class="badge">RABIN-KARP</span>
       <span class="badge">KMP</span>
       <span class="badge">BOYER-MOORE</span>
+    </div>
+    <div class="header-actions">
+      <a href="http://localhost:3001" target="_blank" class="btn-monitor" title="Abrir dashboard de observabilidade">
+        <span class="monitor-dot"></span>
+        Dashboard
+      </a>
+      <a href="http://localhost:16686" target="_blank" class="btn-traces" title="Visualizar traces no Jaeger">
+        Traces
+      </a>
     </div>
   </header>
 
